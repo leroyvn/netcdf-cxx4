@@ -3,7 +3,7 @@
 # for the netcdf-cxx4 `examples` directory.
 ################################################
 
-IF(NCXX_ENABLE_TESTS)
+IF(NCXX_BUILD_TESTS)
 
   add_bin_test(examples simple_xy_wr)
   add_bin_test(examples sfc_pres_temp_wr)

@@ -79,7 +79,7 @@ IF(MSVC)
   SET(GLOBAL PROPERTY USE_FOLDERS ON)
 ENDIF()
 
-#Add custom CMake Module
+# Add custom CMake Module
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/"
   CACHE INTERNAL "Location of our custom CMake modules.")
 
@@ -278,19 +278,19 @@ INCLUDE(CTest)
 
 ##
 # Default building shared libraries.
-# BUILD_SHARED_LIBS is provided by/used by
+# NCXX_BUILD_SHARED_LIBS is provided by/used by
 # CMake directly.
 ##
-OPTION(BUILD_SHARED_LIBS "Configure netcdf-cxx as a shared library." ON)
-IF(BUILD_SHARED_LIBS)
+OPTION(NCXX_BUILD_SHARED_LIBS "Configure netcdf-cxx as a shared library." ON)
+IF(NCXX_BUILD_SHARED_LIBS)
   SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
 ##
 # Enable doxygen-generated documentation.
 ##
-OPTION(ENABLE_DOXYGEN "Enable generation of doxygen-based documentation." OFF)
-IF(ENABLE_DOXYGEN)
+OPTION(NCXX_ENABLE_DOXYGEN "Enable generation of doxygen-based documentation." OFF)
+IF(NCXX_ENABLE_DOXYGEN)
   FIND_PACKAGE(Doxygen REQUIRED)
   FIND_PROGRAM(NCXX_DOT NAMES dot)
   IF(NCXX_DOT)
@@ -336,7 +336,6 @@ MARK_AS_ADVANCED(NCXX_CTEST_PROJECT_NAME
   NCXX_CTEST_DROP_LOC_PREFIX
 )
 
-
 ################################
 # End User Options
 ################################
@@ -349,32 +348,10 @@ MARK_AS_ADVANCED(NCXX_CTEST_PROJECT_NAME
 ###
 # Find NetCDF
 ###
-IF(NOT netCDF_LIBRARIES AND NOT netCDF_INCLUDE_DIR)
-  FIND_PACKAGE(netCDF QUIET)
-ELSE()
-  SET(netCDF_FOUND TRUE)
-ENDIF()
 
-IF (netCDF_FOUND)
-  INCLUDE_DIRECTORIES(SYSTEM ${netCDF_INCLUDE_DIR})
-  SET(NETCDF_C_LIBRARY ${netCDF_LIBRARIES})
-  SET(NETCDF_C_INCLUDE_DIR ${netCDF_INCLUDE_DIR})
-ELSE()
-  # netCDF not properly packaged. Try to find it manually.
-  FIND_LIBRARY(NETCDF_C_LIBRARY NAMES netcdf libnetcdf)
-  IF(NOT NETCDF_C_LIBRARY)
-    MESSAGE(FATAL_ERROR "libnetcdf not found. Please reinstall and try again.")
-  ELSE()
-    MESSAGE(STATUS "Found netcdf: ${NETCDF_C_LIBRARY}")
-    FIND_PATH(NC_H_INCLUDE_DIR "netcdf.h")
-    IF(NOT NC_H_INCLUDE_DIR)
-      MESSAGE(FATAL_ERROR "Directory containing netcdf.h cannot be found. Please reinstall and try again.")
-    ELSE()
-      GET_FILENAME_COMPONENT(netCDF_LIB_DIR "${NETCDF_C_LIBRARY}" REALPATH)
-      INCLUDE_DIRECTORIES(SYSTEM ${NC_H_INCLUDE_DIR})
-    ENDIF()
-  ENDIF()
-ENDIF()
+find_package(NetCDF REQUIRED)
+include_directories(SYSTEM ${NetCDF_INCLUDE_DIRS})
+set(NETCDF_C_LIBRARY ${NetCDF_LIBRARIES})
 
 ###
 # Check to see if netcdf-c was built with parallel.
@@ -429,9 +406,9 @@ IF(CMAKE_COMPILER_IS_GNUCC OR APPLE)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unused-variable -Wno-unused-parameter")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-variable -Wno-unused-parameter")
 
-  OPTION(ENABLE_COVERAGE_TESTS "Enable compiler flags needed to perform coverage tests." OFF)
-  OPTION(ENABLE_CONVERSION_WARNINGS "Enable warnings for implicit conversion from 64 to 32-bit datatypes." ON)
-  OPTION(ENABLE_LARGE_FILE_TESTS "Enable large file tests." OFF)
+  OPTION(NCXX_ENABLE_COVERAGE_TESTS "Enable compiler flags needed to perform coverage tests." OFF)
+  OPTION(NCXX_ENABLE_CONVERSION_WARNINGS "Enable warnings for implicit conversion from 64 to 32-bit datatypes." OFF)
+  OPTION(NCXX_ENABLE_LARGE_FILE_TESTS "Enable large file tests." OFF)
 
   # Check to see if -Wl,--no-undefined is supported.
   CHECK_CXX_LINKER_FLAG("-Wl,--no-undefined" LIBTOOL_HAS_NO_UNDEFINED)
@@ -442,14 +419,14 @@ IF(CMAKE_COMPILER_IS_GNUCC OR APPLE)
   SET(CMAKE_REQUIRED_FLAGS "${TMP_CMAKE_REQUIRED_FLAGS}")
 
   # Coverage tests need to have optimization turned off.
-  IF(ENABLE_COVERAGE_TESTS)
+  IF(NCXX_ENABLE_COVERAGE_TESTS)
     SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
     MESSAGE(STATUS "Coverage Tests: On.")
   ENDIF()
 
     # Warnings for 64-to-32 bit conversions.
-  IF(ENABLE_CONVERSION_WARNINGS)
+  IF(NCXX_ENABLE_CONVERSION_WARNINGS)
     CHECK_CXX_COMPILER_FLAG(-Wconversion CXX_HAS_WCONVERSION)
     CHECK_CXX_COMPILER_FLAG(-Wshorten-64-to-32 CXX_HAS_SHORTEN_64_32)
 
@@ -460,7 +437,7 @@ IF(CMAKE_COMPILER_IS_GNUCC OR APPLE)
       SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wconversion")
     ENDIF()
 
-  ENDIF(ENABLE_CONVERSION_WARNINGS)
+  ENDIF(NCXX_ENABLE_CONVERSION_WARNINGS)
 
 ENDIF(CMAKE_COMPILER_IS_GNUCC OR APPLE)
 
@@ -540,8 +517,8 @@ SET(CFLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE}}")
 SET(CXXFLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
 SET(LDFLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS_${CMAKE_BUILD_TYPE}}")
 
-is_disabled(BUILD_SHARED_LIBS enable_static)
-is_enabled(BUILD_SHARED_LIBS enable_shared)
+is_disabled(NCXX_BUILD_SHARED_LIBS enable_static)
+is_enabled(NCXX_BUILD_SHARED_LIBS enable_shared)
 
 # Remove libnetcdf from NC_LIBS.
 STRING(REPLACE "-lnetcdf-cxx4 " "" TMP_NCXX_LIBS "${NCXX_LIBS}")
@@ -560,7 +537,8 @@ FILE(
   READ "${CMAKE_CURRENT_BINARY_DIR}/libnetcdf-cxx.settings"
   LIBNETCDFCXX_SETTINGS
   )
-MESSAGE(${LIBNETCDFCXX_SETTINGS})
+message(STATUS "netCDF-CXX4 configuration summary")
+message(${LIBNETCDFCXX_SETTINGS})
 
 # Install libnetcdf-cxx.settings file into same location
 # as the libraries.
@@ -647,7 +625,7 @@ IF(NC_HAS_DEF_VAR_FILTER)
   ADD_SUBDIRECTORY(plugins)
 ENDIF(NC_HAS_DEF_VAR_FILTER)
 
-IF(ENABLE_DOXYGEN)
+IF(NCXX_ENABLE_DOXYGEN)
   ADD_SUBDIRECTORY(docs)
 ENDIF()
 
