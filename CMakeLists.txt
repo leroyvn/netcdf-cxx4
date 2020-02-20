@@ -577,7 +577,7 @@ INSTALL(PROGRAMS ${NCXX_BINARY_DIR}/ncxx4-config
 SET(EXTRA_DIST ${EXTRA_DIST} ${CMAKE_SOURCE_DIR}/test_common.in)
 SET(TOPSRCDIR "${CMAKE_SOURCE_DIR}")
 SET(TOPBUILDDIR "${CMAKE_BINARY_DIR}")
-configure_file(${CMAKE_SOURCE_DIR}/test_common.in ${CMAKE_BINARY_DIR}/test_common.sh @ONLY NEWLINE_STYLE LF)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_common.in ${CMAKE_BINARY_DIR}/test_common.sh @ONLY NEWLINE_STYLE LF)
 
 #####
 # Options
@@ -619,8 +619,8 @@ IF(NC_HAS_DEF_VAR_FILTER)
   # Build cxx4/findplugin.sh
   #####
   SET(ISCMAKE "1")
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cxx4/findplugin.in ${CMAKE_BINARY_DIR}/cxx4/findplugin.sh @ONLY NEWLINE_STYLE LF)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/examples/findplugin.in ${CMAKE_BINARY_DIR}/examples/findplugin.sh @ONLY NEWLINE_STYLE LF)
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cxx4/findplugin.in ${CMAKE_BINARY_DIR}/cxx4/findplugin.sh @ONLY NEWLINE_STYLE LF)
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/examples/findplugin.in ${CMAKE_BINARY_DIR}/examples/findplugin.sh @ONLY NEWLINE_STYLE LF)
 
   ADD_SUBDIRECTORY(plugins)
 ENDIF(NC_HAS_DEF_VAR_FILTER)
